@@ -1,93 +1,93 @@
 # pstack-claude
 
-把 [pstack](https://github.com/cursor/plugins/tree/main/pstack)（poteto 的严谨 agent 工作流）移植成 Claude Code 插件。只用 Claude 模型（fable / opus / sonnet / haiku），不调用任何外部模型或 CLI。
+A Claude Code plugin port of [pstack](https://github.com/cursor/plugins/tree/main/pstack) (poteto's rigorous agent workflow). It uses Claude models only (fable / opus / sonnet / haiku) and never calls external models or CLIs.
 
-## 前置条件
+## Prerequisites
 
-- [Claude Code](https://code.claude.com)（在 2.1.289 上测试过）
-- Node.js 18 或更高版本，插件的 hook 是 Node 脚本
+- [Claude Code](https://code.claude.com) (tested on 2.1.289)
+- Node.js 18 or later (the plugin's hooks are Node scripts)
 
-## 安装 / 试用 / 卸载
+## Install / try / uninstall
 
-在要启用 pstack 的项目根目录执行：
+Run these from the root of the project where you want pstack:
 
 ```bash
-# 只在当前项目启用（写入 .claude/settings.local.json，默认被 gitignore，不会提交）
+# Enable for this project only (writes .claude/settings.local.json, which is gitignored by default)
 claude plugin marketplace add pstack-pro/pstack-claude --scope local
 claude plugin install pstack@pstack-claude --scope local
 
-# 更新到 GitHub 上的最新版本
+# Update to the latest version on GitHub
 claude plugin marketplace update pstack-claude
 
-# 从当前项目卸载
+# Uninstall from this project
 claude plugin uninstall pstack@pstack-claude --scope local
 claude plugin marketplace remove pstack-claude --scope local
 ```
 
-用 local scope 安装时，其他项目的 `claude plugin list` 里会显示 pstack，但状态是 disabled，不会加载。
+With a local-scope install, `claude plugin list` in other projects shows pstack as disabled; it isn't loaded there.
 
-想改代码，或者只想在一次会话里试用，可以 clone 到任意目录，然后用本地路径：
+To hack on the code, or to try it for a single session, clone it anywhere and use the local path:
 
 ```bash
-git clone https://github.com/pstack-pro/pstack-claude.git <任意目录>
+git clone https://github.com/pstack-pro/pstack-claude.git <any-dir>
 
-# 只试一次：仅这次会话加载，不写任何配置
-claude --plugin-dir <任意目录>
+# Try it once: loaded for this session only, no config written
+claude --plugin-dir <any-dir>
 
-# 或者从本地目录安装到当前项目（Claude Code 会保存成绝对路径）
-claude plugin marketplace add <任意目录> --scope local
+# Or install from the local directory into this project (Claude Code stores an absolute path)
+claude plugin marketplace add <any-dir> --scope local
 claude plugin install pstack@pstack-claude --scope local
 ```
 
-**同一台机器上，GitHub 和本地目录两种来源只能选一种。** marketplace 名字 `pstack-claude` 是全局共享的：再用另一种来源添加，会替换掉所有项目共用的来源；移除时也会把这条全局登记一起删掉，导致其他项目里的 pstack 失效。要切换来源，先在所有启用了 pstack 的项目里卸载，再用新来源重新安装。
+**On a given machine, pick one source: GitHub or a local directory.** The marketplace name `pstack-claude` is global. Adding it again from the other source replaces the source for every project, and removing it deletes that global entry, breaking pstack in other projects. To switch sources, uninstall from every project that has pstack enabled, then reinstall from the new source.
 
-## 开始用
+## Getting started
 
-1. `/pstack:setup-pstack`：写入 `.pstack/models.md`，默认使用 `claude-tiers` 方案，可以按角色修改。
-2. `/pstack:poteto-mode <任务>`：主入口，会自动选择 playbook。
+1. `/pstack:setup-pstack`: writes `.pstack/models.md`, starting from the `claude-tiers` mapping; you can change any role.
+2. `/pstack:poteto-mode <task>`: the main entry point; it picks the right playbook automatically.
 
-`claude-tiers` 方案：
+The `claude-tiers` mapping:
 
-| 角色 | 模型 |
+| Role | Model |
 |---|---|
 | hardest tasks | `fable` |
-| 判断和写作（judgment、how/why 的综合、reflect 的评审） | `opus` |
-| 写代码（feature、bug-fix、perf、refactoring、swarm） | `sonnet` |
-| 调查（how explorer、why investigators） | `haiku` |
-| 评审组（arena、architect、interrogate） | `opus, sonnet, haiku` |
+| Judgment and writing (judgment, how/why synthesis, reflect review) | `opus` |
+| Coding (feature, bug-fix, perf, refactoring, swarm) | `sonnet` |
+| Investigation (how explorer, why investigators) | `haiku` |
+| Review panels (arena, architect, interrogate) | `opus, sonnet, haiku` |
 
-推理强度不按角色设置，跟随会话的 `/effort`。改了 `.pstack/models.md` 之后，`/clear` 或开一个新会话，新的配置才会注入。
+Reasoning effort isn't set per role; it follows the session's `/effort`. After editing `.pstack/models.md`, run `/clear` or start a new session so the new config gets injected.
 
-如果不想把模型配置提交到项目仓库，把 `.pstack/` 加进项目的 `.gitignore`。
+If you don't want to commit the model config to your project repo, add `.pstack/` to the project's `.gitignore`.
 
-## 和 Cursor 版的差异
+## Differences from the Cursor version
 
-转换后的 skill 正文基本保持原样，差异由下面几处补上：
+The converted skill bodies are kept essentially unchanged; the gaps are filled by:
 
-- `CLAUDE-CODE.md`：把 Cursor 的工具和功能逐项映射到 Claude Code，例如 `Task` 对应 `Agent`，`readonly` 对应 `pstack:readonly`，`environment: "cloud"` 对应 `isolation: "worktree"`，`AskQuestion` 对应 `AskUserQuestion`。主会话通过 SessionStart hook 注入这份说明；pstack 的 agent 和 poteto-mode 会自己读取。
-- `hooks/session-start.mjs`：把说明、`.pstack/models.md` 和当前 transcript 的路径注入新会话。
-- `hooks/allow-plugin-read.mjs`：自动放行对插件目录内文件的 Read、Glob、Grep，因为 skill 需要读取自己的 playbook。插件目录外的路径和指向外部的符号链接，仍然走正常的权限流程。
-- `agents/readonly.md`：禁用编辑类工具的通用 agent，对应 Cursor 的 `readonly: true`。
-- 配置文件放在 `.pstack/models.md`，而不是 `.claude/` 下。Claude Code 把 `.claude/` 当作敏感目录，每次写入都要确认。
+- `CLAUDE-CODE.md`: maps Cursor tools and features to Claude Code one by one — e.g. `Task` → `Agent`, `readonly` → `pstack:readonly`, `environment: "cloud"` → `isolation: "worktree"`, `AskQuestion` → `AskUserQuestion`. The main session gets it via a SessionStart hook; pstack's agents and poteto-mode read it themselves.
+- `hooks/session-start.mjs`: injects that guide, `.pstack/models.md`, and the current transcript path into new sessions.
+- `hooks/allow-plugin-read.mjs`: auto-approves Read, Glob, and Grep on files inside the plugin directory, since skills need to read their own playbooks. Paths outside the plugin directory, and symlinks pointing outside it, still go through the normal permission flow.
+- `agents/readonly.md`: a general-purpose agent with editing tools disabled, equivalent to Cursor's `readonly: true`.
+- Config lives in `.pstack/models.md` rather than under `.claude/`, because Claude Code treats `.claude/` as sensitive and asks for confirmation on every write.
 
-## 跟进上游
+## Tracking upstream
 
 ```bash
-node scripts/sync.mjs                        # 自动浅克隆 github.com/cursor/plugins 到系统临时目录
-node scripts/sync.mjs <plugins 仓库>/pstack   # 或者指定本地已有的 checkout
-PSTACK_SRC=<plugins 仓库>/pstack node scripts/sync.mjs
+node scripts/sync.mjs                        # shallow-clones github.com/cursor/plugins into the system temp dir
+node scripts/sync.mjs <plugins-repo>/pstack   # or point at an existing local checkout
+PSTACK_SRC=<plugins-repo>/pstack node scripts/sync.mjs
 
-test/smoke.sh                                # 离线检查：不调用模型，不消耗额度
+test/smoke.sh                                # offline checks: no model calls, no usage
 ```
 
-`sync.mjs` 会重新生成 `skills/` 和 `agents/`，然后叠加 `overrides/`（`setup-pstack` 和 `readonly` agent）。上游版本记录在 `UPSTREAM.json`。
+`sync.mjs` regenerates `skills/` and `agents/`, then layers `overrides/` on top (`setup-pstack` and the `readonly` agent). The upstream version is recorded in `UPSTREAM.json`.
 
-## 许可
+## License
 
-pstack 原作者 Lauren Tan，MIT 许可，见 `LICENSE-pstack`。
+pstack was created by Lauren Tan and is MIT-licensed; see `LICENSE-pstack`.
 
-## 相关仓库
+## Related repositories
 
-- 中文版（skill 描述与正文已译成中文，预览）：<https://github.com/pstack-pro/pstack-claude-zh>
-- 另一个移植：<https://github.com/pstack-pro/pstack-pi>
-- 上游 pstack：<https://github.com/cursor/plugins/tree/main/pstack>
+- Chinese edition (skill descriptions and bodies translated to Chinese, preview): <https://github.com/pstack-pro/pstack-claude-zh>
+- The other port: <https://github.com/pstack-pro/pstack-pi>
+- Upstream pstack: <https://github.com/cursor/plugins/tree/main/pstack>
