@@ -1,4 +1,4 @@
-# claude-pstack
+# pstack-claude
 
 把 [pstack](https://github.com/cursor/plugins/tree/main/pstack)（poteto 的严谨 agent 工作流）移植成 Claude Code 插件。只用 Claude 模型（fable / opus / sonnet / haiku），不调用任何外部模型或 CLI。
 
@@ -13,15 +13,15 @@
 
 ```bash
 # 只在当前项目启用（写入 .claude/settings.local.json，默认被 gitignore，不会提交）
-claude plugin marketplace add taokeqin/claude-pstack --scope local
-claude plugin install pstack@claude-pstack --scope local
+claude plugin marketplace add taokeqin/pstack-claude --scope local
+claude plugin install pstack@pstack-claude --scope local
 
 # 更新到 GitHub 上的最新版本
-claude plugin marketplace update claude-pstack
+claude plugin marketplace update pstack-claude
 
 # 从当前项目卸载
-claude plugin uninstall pstack@claude-pstack --scope local
-claude plugin marketplace remove claude-pstack --scope local
+claude plugin uninstall pstack@pstack-claude --scope local
+claude plugin marketplace remove pstack-claude --scope local
 ```
 
 用 local scope 安装时，其他项目的 `claude plugin list` 里会显示 pstack，但状态是 disabled，不会加载。
@@ -29,17 +29,17 @@ claude plugin marketplace remove claude-pstack --scope local
 想改代码，或者只想在一次会话里试用，可以 clone 到任意目录，然后用本地路径：
 
 ```bash
-git clone https://github.com/taokeqin/claude-pstack.git <任意目录>
+git clone https://github.com/taokeqin/pstack-claude.git <任意目录>
 
 # 只试一次：仅这次会话加载，不写任何配置
 claude --plugin-dir <任意目录>
 
 # 或者从本地目录安装到当前项目（Claude Code 会保存成绝对路径）
 claude plugin marketplace add <任意目录> --scope local
-claude plugin install pstack@claude-pstack --scope local
+claude plugin install pstack@pstack-claude --scope local
 ```
 
-**同一台机器上，GitHub 和本地目录两种来源只能选一种。** marketplace 名字 `claude-pstack` 是全局共享的：再用另一种来源添加，会替换掉所有项目共用的来源；移除时也会把这条全局登记一起删掉，导致其他项目里的 pstack 失效。要切换来源，先在所有启用了 pstack 的项目里卸载，再用新来源重新安装。
+**同一台机器上，GitHub 和本地目录两种来源只能选一种。** marketplace 名字 `pstack-claude` 是全局共享的：再用另一种来源添加，会替换掉所有项目共用的来源；移除时也会把这条全局登记一起删掉，导致其他项目里的 pstack 失效。要切换来源，先在所有启用了 pstack 的项目里卸载，再用新来源重新安装。
 
 ## 开始用
 
@@ -85,3 +85,9 @@ test/smoke.sh                                # 离线检查：不调用模型，
 ## 许可
 
 pstack 原作者 Lauren Tan，MIT 许可，见 `LICENSE-pstack`。
+
+## 相关仓库
+
+- 中文版（skill 描述与正文已译成中文，预览）：<https://github.com/taokeqin/pstack-claude-zh>
+- 另一个移植：<https://github.com/taokeqin/pstack-pi>
+- 上游 pstack：<https://github.com/cursor/plugins/tree/main/pstack>

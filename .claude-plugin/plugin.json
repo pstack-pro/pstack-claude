@@ -2,7 +2,17 @@
   "name": "pstack",
   "version": "0.1.2",
   "description": "pstack (poteto's rigorous agent workflows) adapted for Claude Code. Write less, but higher quality code.",
-  "author": { "name": "Hacken Tao" },
+  "author": {
+    "name": "Hacken Tao"
+  },
   "license": "MIT",
-  "keywords": ["pstack", "poteto-mode", "workflow", "principles", "subagents"]
+  "keywords": [
+    "pstack",
+    "poteto-mode",
+    "workflow",
+    "principles",
+    "subagents"
+  ],
+  "homepage": "https://github.com/taokeqin/pstack-claude",
+  "repository": "https://github.com/taokeqin/pstack-claude"
 }

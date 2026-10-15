@@ -1,6 +1,6 @@
 ---
 name: readonly
-description: General-purpose subagent with edit tools disabled. Use where a pstack skill asks for a `readonly: true` subagent (explorers, explainers, reviewers).
+description: "General-purpose subagent with edit tools disabled. Use where a pstack skill asks for a `readonly: true` subagent (explorers, explainers, reviewers)."
 disallowedTools: Edit, Write, NotebookEdit
 ---
 

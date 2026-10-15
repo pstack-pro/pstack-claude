@@ -1,5 +1,5 @@
 {
-  "name": "claude-pstack",
+  "name": "pstack-claude",
   "description": "Local marketplace for the Claude Code port of pstack",
   "owner": {
     "name": "Hacken Tao"
