@@ -13,7 +13,7 @@
 
 ```bash
 # 只在当前项目启用（写入 .claude/settings.local.json，默认被 gitignore，不会提交）
-claude plugin marketplace add taokeqin/pstack-claude --scope local
+claude plugin marketplace add pstack-pro/pstack-claude --scope local
 claude plugin install pstack@pstack-claude --scope local
 
 # 更新到 GitHub 上的最新版本
@@ -29,7 +29,7 @@ claude plugin marketplace remove pstack-claude --scope local
 想改代码，或者只想在一次会话里试用，可以 clone 到任意目录，然后用本地路径：
 
 ```bash
-git clone https://github.com/taokeqin/pstack-claude.git <任意目录>
+git clone https://github.com/pstack-pro/pstack-claude.git <任意目录>
 
 # 只试一次：仅这次会话加载，不写任何配置
 claude --plugin-dir <任意目录>
@@ -88,6 +88,6 @@ pstack 原作者 Lauren Tan，MIT 许可，见 `LICENSE-pstack`。
 
 ## 相关仓库
 
-- 中文版（skill 描述与正文已译成中文，预览）：<https://github.com/taokeqin/pstack-claude-zh>
-- 另一个移植：<https://github.com/taokeqin/pstack-pi>
+- 中文版（skill 描述与正文已译成中文，预览）：<https://github.com/pstack-pro/pstack-claude-zh>
+- 另一个移植：<https://github.com/pstack-pro/pstack-pi>
 - 上游 pstack：<https://github.com/cursor/plugins/tree/main/pstack>
